@@ -1,0 +1,50 @@
+<html>
+<head>
+<%base_hostname%>
+</head>
+
+<script>
+<!-- BEGIN_OF_NM_CORE -->
+class NMCore{static _DEBUG="";static _PAGENAME="";static init(e){var t=this;this._DEBUG=e.DEBUG,this._PAGENAME=e.NAME,document.addEventListener("click",e=>{const t=e.target.closest("[nm-click]");if(!t)return;let n=t.getAttribute("nm-click");n=encodeURI(n),window.chrome.webview.postMessage(n)}),document.body.addEventListener("dragover",e=>{e.preventDefault()}),document.body.addEventListener("drop",e=>{e.preventDefault(),e.stopPropagation()}),document.body.addEventListener("dragenter",e=>{e.preventDefault(),e.stopPropagation();const n=(e.originalEvent||e).dataTransfer;if(!n)return;const o=n.types;o&&1===o.length&&"Files"===o[0]&&t.#e("NMBodyDragover")}),document.body.addEventListener("mouseenter",e=>{e.preventDefault(),t.#e("NMBodyDragleave")}),document.addEventListener("keypress",e=>{"Enter"===e.key&&e.target.closest("input:not(.allow_submit)")&&e.preventDefault()}),window.addEventListener("beforeunload",e=>{t.#e("OnBeforeUnload")}),window.addEventListener("load",e=>{t.#e("OnLoad")}),document.addEventListener("keydown",e=>{"F5"!==e.key&&"F7"!==e.key||e.preventDefault(),"KeyR"===e.code&&e.ctrlKey&&e.preventDefault(),"KeyF"===e.code&&e.ctrlKey&&e.preventDefault(),1==t._DEBUG&&"F10"===e.key&&t.save()}),window.chrome.webview.addEventListener("message",e=>{const t=e.data,n=new CustomEvent(t.event,{detail:t.args});window.dispatchEvent(n)})}static#e(e){window.chrome.webview.postMessage(`${this._PAGENAME}.${e}`)}static call(e,t){if(""==e)return;let n=[];t&&Object.keys(t).forEach(e=>{if("form"==e){var o=document.getElementById(t.form);n.push(new URLSearchParams(new FormData(o)).toString())}else{const o=t[e];n.push(encodeURIComponent(`${e}=${o}`))}});let o=e;n.length>0&&(o+="?"+n.join("&")),window.chrome.webview.postMessage(o)}static getFormValues(e){const t=[];return document.querySelectorAll(`[name="${e}"]`).forEach(e=>{const n=(e.getAttribute("type")||"").toLowerCase();"checkbox"===n||"radio"===n?e.checked&&t.push(e.value):"SELECT"===e.tagName&&e.multiple?t.push(...Array.from(e.selectedOptions).map(e=>e.value)):t.push(e.value)}),t}static save(){this.#e("DownloadSource?done="+encodeURIComponent(function(e,t){t=t.slice(1,-1);var n=new Blob([t]),o=(window.URL||window.webkitURL).createObjectURL(n),a=document.createElement("a");a.download=e,a.href=o,a.click()}))}}
+<!-- END_OF_NM_CORE -->
+</script>
+
+<body>
+
+	<%contents%>
+
+	<!-- デバッグモードの通知 -->
+	<script>
+	if (<%debug_mode%> == true)
+	{
+		document.write(`		
+			<div style="height:25px;
+						width:200px;
+						background:rgba(0,0,0,0.4);
+						color:#fff;
+						position:fixed;
+						bottom:30px;
+						right:0px;
+						text-align:center;
+						z-index:999;">
+				<span>
+					<small><strong>デバッグモードが有効</strong></small>
+				</span>
+			</div>
+		`);
+	}
+	</script>
+	<!-- デバッグモードの通知 -->
+
+</body>
+
+<script>
+NMCore.init({
+  DEBUG:  <%debug_mode%>,
+  NAME : "<%current_page_name%>"
+});
+const _NM = NMCore;
+
+</script>
+
+</html>
