@@ -94,7 +94,7 @@ namespace NMBrowser
             {
                 // ローカルディレクトリを仮想ホスト名にマッピング
                 // ローカルディレクトリを仮想的なWebサーバーとしてWebView2に認識させ、
-                // http://またはhttps://スキームでアクセスできるようにします。
+                // http://またはhttps://スキームでアクセスできるようにさせます
 
                 // 仮想ホスト名のマッピング
                 CoreWebView2.SetVirtualHostNameToFolderMapping(_hostname, _folderpath, CoreWebView2HostResourceAccessKind.Allow);
@@ -151,7 +151,7 @@ namespace NMBrowser
             }
             else if (url.StartsWith("data") == false)
             {
-                // 外部サイトへのアクセスも禁止（セキュリティ対策として）
+                // 外部サイトへのアクセスは禁止
                 // ブラウザのデフォルト404を防ぐために、画像以外のNavigateイベントは全てキャンセルする
 
                 // dataで始まらないURLはすべてキャンセル
@@ -178,7 +178,6 @@ namespace NMBrowser
                 json = json.Trim('"');
 
                 // ドロップパネルの処理はページではなく、ここで処理する
-                // ページ側では、上書きされる可能性があるため
                 if (json.Contains("NMBodyDragover"))
                 {
                     ShowDropPanel(true);
@@ -320,10 +319,7 @@ namespace NMBrowser
             NMWebPage? page = GetPage(class_name);
             if (page == null) return;
 
-            // ここで、クエリ中に含まれる+が除去されるため、JSのコードがエラーになる
-            //string query = HttpUtility.UrlDecode(uri.Query);
-
-            // なので、自力でクエリを取得する
+            // 自力でクエリを取得する
             int index = uri.ToString().IndexOf("?");
             if (index > 0)
             {
@@ -459,7 +455,7 @@ namespace NMBrowser
             // スクリプト実行
             var result = await CoreWebView2.ExecuteScriptAsync(script);
 
-            // WebView2の返却値は「JSON文字列」として返ってくる
+            // WebView2の返却値は、JSONとして返ってくる
             if (string.IsNullOrEmpty(result) || result == "null")
             {
                 return default!;
@@ -569,17 +565,14 @@ namespace NMBrowser
 
         public abstract void Draw();
 
-
         virtual public void OnDragDrop(object sender, DragEventArgs e)
         {
         }
-
 
         internal void SetBrowser(NMBrowser browser)
         {
             _browser = browser;
         }
-
 
         protected void PostMessage(string eventName, params object[] args)
         {
@@ -813,7 +806,6 @@ namespace NMBrowser
         //
         // 送信されたFormデータを処理する
         //
-
         internal void SetQuery(string query)
         {
             _pa.SetQuery(query);
@@ -894,12 +886,12 @@ namespace NMBrowser
         // ------------------------------------------------------------------------------------------------------------- //
 
 
-        // 画面に値を設定する
         protected void ClearCache()
         {
             _sc.Clear();
         }
 
+        // 画面に値を設定する
         protected void Attach<T>(string key, T value)
         {
             _sc.Set<T>(key, value);
@@ -998,8 +990,7 @@ namespace NMBrowser
                                                 "<", "&lt;",
                                                 ">", "&gt;",
                                                 "\"", "&quot;",
-                                                "'", "&#39;"
-                                              };
+                                                "'", "&#39;"};
 
                 for (int i = 0; i < html_special_chars.Length; i += 2)
                 {
@@ -1039,6 +1030,7 @@ namespace NMBrowser
                     string placeholder = kv.Key;
                     string value = kv.Value;
 
+                    // プレースホルダーに . や + が入っても安全に処理できるようにエスケープする
                     string ph = Regex.Escape(placeholder);
 
                     // <% placeholder %> → エスケープ値
@@ -1073,11 +1065,6 @@ namespace NMBrowser
                 _query_map.Clear();
             }
 
-            /*
-             * 
-             * ＵＲＬクエリストリングの設定
-             * 
-             */
             internal void SetQuery(string query)
             {
                 _query_map.Clear();
@@ -1087,7 +1074,7 @@ namespace NMBrowser
                 if (query != string.Empty)
                 {
                     // エスケープされた文字列を元の文字列に変換します。
-                    // エスケープシーケンス（\t、\\ など）も適切に処理されます。
+                    // エスケープシーケンス（\t、\\ など）も適切に処理する。
                     //query = Regex.Unescape(query);
 
                     string[] param_data = query.Split('&');
@@ -1115,7 +1102,6 @@ namespace NMBrowser
                             // 同じキーが複数送信された場合、配列として管理する
                             _query_map[key].Add(val);
                         }
-
                     }
                 }
             }
@@ -1153,7 +1139,6 @@ namespace NMBrowser
                 return false;
             }
 
-
             public string Get(string key, string def_val = "")
             {
                 if (_query_map.ContainsKey(key))
@@ -1166,7 +1151,7 @@ namespace NMBrowser
 
             //
             // defaultは、その型のデフォルト値
-            // 参照型なら null。値型なら その型のゼロ値 (intならゼロ)
+            // 参照型なら null。値型なら その型のゼロ値
             public T Get<T>(string key, T def_val = default(T)!)
             {
                 if (_query_map.ContainsKey(key) == false) return def_val;
@@ -1178,7 +1163,6 @@ namespace NMBrowser
                     if (type.IsArray)
                     {
                         // 配列で返す
-
                         var vals = _query_map[key];
 
                         Type elemType = type.GetElementType()!;
