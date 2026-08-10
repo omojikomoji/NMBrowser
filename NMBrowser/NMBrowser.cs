@@ -71,6 +71,9 @@ namespace NMBrowser
             // コンテキストメニュー禁止
             CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
 
+            // 1. ピンチズーム（タッチパネル・タッチパッドのピンチ）を無効化
+            CoreWebView2.Settings.IsPinchZoomEnabled = false;
+
             // ズームコントロールを無効にする
             CoreWebView2.Settings.IsZoomControlEnabled = false;
 
